@@ -1,10 +1,31 @@
-version: '3.5'
+version: "3.1"
+# 服务配置
 services:
-  master:
-    image: ""
+  elasticsearch:
+    image: bitnami/elasticsearch:8.12.2-debian-12-r0-ik
+    restart: always
     environment:
-      - name=value
+      - "ES_JAVA_OPTS=-Xms4g -Xmx4g"
+      - "TZ=Asia/Shanghai"
+      - "discovery.type=single-node"
+      - "ELASTIC_PASSWORD=${INIT_PASSWORD}"
     ports:
-      - "31997:9997"
+      - "9200:9200"
+      - "9300:9300"
     volumes:
-      - hostPath:containerPath:ro
+      - ${DATA_ROOT}/elasticsearch/data:/usr/share/elasticsearch/data
+      - ${DATA_ROOT}/elasticsearch/plugins:/usr/share/elasticsearch/plugins
+
+  kibana:
+    image: bitnami/kibana:8.12.2-debian-12-r1
+    restart: always
+    environment:
+      - "TZ=Asia/Shanghai"
+      - "I18N_LOCALE=zh-CN"
+      - "ELASTICSEARCH_HOSTS=http://elasticsearch:9200"
+      - "ELASTICSEARCH_USERNAME=elastic"
+      - "ELASTICSEARCH_PASSWORD=${INIT_PASSWORD}"
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
