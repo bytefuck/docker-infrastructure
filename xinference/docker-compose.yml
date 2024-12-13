@@ -1,0 +1,34 @@
+version: '3.5'
+services:
+  supervisor:
+    image: registry.cn-hangzhou.aliyuncs.com/xprobe_xinference/xinference:v1.0.1
+    environment:
+      XINFERENCE_MODEL_SRC: modelscope
+      HF_ENDPOINT: https://hf-mirror.com
+    ports:
+      - "31997:9997"
+    volumes:
+      - /mnt/data/xinference:/root
+    command: ["xinference-supervisor" ,"-H" ,"supervisor", "--log-level" ,"info"]
+    restart: "always"
+
+  worker:
+    image: registry.cn-hangzhou.aliyuncs.com/xprobe_xinference/xinference:v1.0.1
+    environment:
+      XINFERENCE_MODEL_SRC: modelscope
+      HF_ENDPOINT: https://hf-mirror.com
+    ports:
+      - "9997"
+    volumes:
+      - /mnt/data/xinference:/root
+    command: ["xinference-worker" ,"-e","http://supervisor:9997","-H" ,"worker", "--log-level" ,"info"]
+    restart: "always"
+    shm_size: "2g"
+    depends_on: 
+      - supervisor
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: ["gpu"]
+

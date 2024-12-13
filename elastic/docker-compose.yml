@@ -1,0 +1,10 @@
+version: '3.5'
+services:
+  master:
+    image: ""
+    environment:
+      - name=value
+    ports:
+      - "31997:9997"
+    volumes:
+      - hostPath:containerPath:ro
